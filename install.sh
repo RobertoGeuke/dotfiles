@@ -18,7 +18,8 @@ fi
 
 # nvim
 if [[ $FILTER == 'all' ]] || [[ $FILTER == 'nvim' ]]; then
-    # TODO: check if ~/.config exists?
+    rm -rf ~/.config/nvim
+    mkdir -p ~/.config
     cp -r nvim ~/.config/nvim
 fi
 
