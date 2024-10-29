@@ -1,20 +1,33 @@
 #!/bin/bash
 
+FILTER="${1-all}"
+
 # zshrc
-cp .zshrc ~/.zshrc
-if [[ $(hostname) == "dev-001" ]]; then
-    echo "export PATH=\"/home/robertogeuke/bin:/home/robertogeuke/bin/nvim-linux64/bin:\$PATH\"" >> ~/.zshrc
+if [[ $FILTER == 'all' ]] || [[ $FILTER == 'zshrc' ]]; then
+    cp .zshrc ~/.zshrc
+    if [[ $(hostname) == "dev-001" ]]; then
+        echo "export PATH=\"/home/robertogeuke/bin:/home/robertogeuke/bin/nvim-linux64/bin:\$PATH\"" >> ~/.zshrc
+    fi
 fi
 
+
 # tmux
-cp .tmux.conf ~/.tmux.conf
+if [[ $FILTER == 'all' ]] || [[ $FILTER == 'tmux' ]]; then
+    cp .tmux.conf ~/.tmux.conf
+fi
 
 # nvim
-# TODO: check if ~/.config exists?
-cp -r nvim ~/.config/nvim
+if [[ $FILTER == 'all' ]] || [[ $FILTER == 'nvim' ]]; then
+    # TODO: check if ~/.config exists?
+    cp -r nvim ~/.config/nvim
+fi
+
 
 # specific MacOS dotfiles
 if [[ $OSTYPE == 'darwin'* ]]; then
-    cp .alacritty.toml  ~/.alacritty.toml
+    # alacritty
+    if [[ $FILTER == 'all' ]] || [[ $FILTER == 'alacritty' ]]; then
+        cp .alacritty.toml  ~/.alacritty.toml
+    fi
 fi
 
