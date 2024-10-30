@@ -1,5 +1,5 @@
--- debug
-vim.lsp.set_log_level("debug")
+-- Disbale LSP logs since the log file grows rather quickly
+vim.lsp.set_log_level("off")
 
 -- Fix buggy node-watch
 vim.opt.backupcopy = "yes"
