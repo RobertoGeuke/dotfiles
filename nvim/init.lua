@@ -15,6 +15,9 @@
 -- - [ ] Upload my .dotfiles to Github
 -- - [ ] Add a keybinding to easily comment out a visual block
 -- - [ ] Find a better way of switching between vim splits and tmux splits (Ctrl-a or Ctrl-w can be confusing)
+-- - [ ] Make my own plugin for phpstan in nvim, use telescope for this.
+-- - [ ] Add support for Dockerfiles. Currently we always get an error when opening one (also in Telescope preview)
+-- - [ ] Access Obsidian notes from nvim with a command like "<leader>sn". This allows for quick notes. Import to keep it synced with cloud.
 
 require("set")
 require("remap")
@@ -341,6 +344,15 @@ require("lazy").setup({
 	},
 	{
 		"tpope/vim-fugitive",
+		config = function()
+			vim.keymap.set("n", "<leader>p", ":Git push origin HEAD:refs/for/master")
+			-- TODO: commands below don't work yet, but I should be close
+			-- vim.api.nvim_create_user_command("Gitmaster", "git remote update && git reset --hard origin/master", {})
+			-- vim.api.nvim_create_user_command("Gitload", function(opts)
+			-- 	vim.cmd.Git({ "fetch origin", opts.fargs[1] })
+			-- 	vim.cmd.Git({ "reset --hard", opts.fargs[1] })
+			-- end, { nargs = 1 })
+		end,
 	},
 	{
 		"ThePrimeagen/harpoon",
