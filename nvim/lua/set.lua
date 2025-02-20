@@ -1,4 +1,4 @@
--- Disbale LSP logs since the log file grows rather quickly
+-- Disable lsp logs, since they grow rather quickly
 vim.lsp.set_log_level("off")
 
 -- Fix buggy node-watch
@@ -21,15 +21,10 @@ vim.opt.mouse = "a"
 -- Don't show mode, already shown in status line
 vim.opt.showmode = false
 
--- Sync clipboard between OS and nvim
--- TODO: Make sure this works cross ssh
-vim.opt.clipboard = "unnamedplus"
-
 -- Enable break indent
 vim.opt.breakindent = true
 
 -- Save undo history
--- TODO: install undotree
 vim.opt.undofile = true
 
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term

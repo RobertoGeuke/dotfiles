@@ -1,23 +1,23 @@
 -- Inspired on nvim-lua/kickstart.nvim
 
--- TODO
+-- TODO 
+-- - [ ] php renames (intelephense pro might have this)
+-- - [ ] Disable preview when ctrl + P. Only preview on live grep
 -- - [ ] Move Lazy plugins to separate files.
--- - [x] Install treesitter context.
--- - [ ] Sync MacOS clipboard and tmux clipboard.
--- - [ ] Look at LazyVim events to speed-up start-up.
--- - [x] Install Undo tree and decide if I want to keep it.
--- - [ ] Install Fugitive and decide if I want to keep it.
+-- - [x] Sync MacOS clipboard and tmux clipboard.
+-- - Fugitive improvements
 --    -  [ ] Add a shortcut so I can open a change in Gerrit from the Git Blame window.
 --    -  [ ] Add a :Gload and :Gcommand like I have in zsh.
 --    -  [ ] Replace :GPush or add a command to easily run `git push origin HEAD:/refs/for/master`
--- - [ ] Install Harpoon and decide if I want to keep it.
--- - [ ] Fix quickfix navigation keybindings
--- - [ ] Upload my .dotfiles to Github
--- - [ ] Add a keybinding to easily comment out a visual block
--- - [ ] Find a better way of switching between vim splits and tmux splits (Ctrl-a or Ctrl-w can be confusing)
+-- - [ ] Close quickfix window with a keybinding
+-- - [x] (re)install which-key
+-- - [x] Install Nerdcommenter
+-- - [x] Install vim-tmux-navigator
+-- - [ ] Become better with netrw or install a file explorer
 -- - [ ] Make my own plugin for phpstan in nvim, use telescope for this.
--- - [ ] Add support for Dockerfiles. Currently we always get an error when opening one (also in Telescope preview)
+-- - [x] Add support for Dockerfiles. Currently we always get an error when opening one (also in Telescope preview)
 -- - [ ] Access Obsidian notes from nvim with a command like "<leader>sn". This allows for quick notes. Import to keep it synced with cloud.
+-- - [ ] Look at repeat.vim
 
 require("set")
 require("remap")
@@ -53,12 +53,83 @@ require("lazy").setup({
 				topdelete = { text = "‾" },
 				changedelete = { text = "~" },
 			},
+			on_attach = function(bufnr)
+				local gitsigns = require("gitsigns")
+
+				local function map(mode, l, r, opts)
+					opts = opts or {}
+					opts.buffer = bufnr
+					vim.keymap.set(mode, l, r, opts)
+				end
+
+				-- Navigation
+				map("n", "]c", function()
+					if vim.wo.diff then
+						vim.cmd.normal({ "]c", bang = true })
+					else
+						gitsigns.nav_hunk("next")
+					end
+				end, { desc = "Jump to next git [c]hange" })
+
+				map("n", "[c", function()
+					if vim.wo.diff then
+						vim.cmd.normal({ "[c", bang = true })
+					else
+						gitsigns.nav_hunk("prev")
+					end
+				end, { desc = "Jump to previous git [c]hange" })
+
+				-- Actions
+				-- visual mode
+				map("v", "<leader>hs", function()
+					gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+				end, { desc = "git [s]tage hunk" })
+				map("v", "<leader>hr", function()
+					gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+				end, { desc = "git [r]eset hunk" })
+				-- normal mode
+				map("n", "<leader>hs", gitsigns.stage_hunk, { desc = "git [s]tage hunk" })
+				map("n", "<leader>hr", gitsigns.reset_hunk, { desc = "git [r]eset hunk" })
+				map("n", "<leader>hS", gitsigns.stage_buffer, { desc = "git [S]tage buffer" })
+				map("n", "<leader>hu", gitsigns.stage_hunk, { desc = "git [u]ndo stage hunk" })
+				map("n", "<leader>hR", gitsigns.reset_buffer, { desc = "git [R]eset buffer" })
+				map("n", "<leader>hp", gitsigns.preview_hunk, { desc = "git [p]review hunk" })
+				map("n", "<leader>hb", gitsigns.blame_line, { desc = "git [b]lame line" })
+				map("n", "<leader>hd", gitsigns.diffthis, { desc = "git [d]iff against index" })
+				map("n", "<leader>hD", function()
+					gitsigns.diffthis("@")
+				end, { desc = "git [D]iff against last commit" })
+				-- Toggles
+				map("n", "<leader>tb", gitsigns.toggle_current_line_blame, { desc = "[T]oggle git show [b]lame line" })
+				map("n", "<leader>tD", gitsigns.preview_hunk_inline, { desc = "[T]oggle git show [D]eleted" })
+			end,
+		},
+	},
+	{ -- Shows pending keybinds.
+		"folke/which-key.nvim",
+		event = "VimEnter",
+		opts = {
+			delay = 0,
+			spec = {
+				{ "<leader>c", group = "[C]ode", mode = { "n", "x" } },
+				{ "<leader>d", group = "[D]ocument" },
+				{ "<leader>r", group = "[R]ename" },
+				{ "<leader>s", group = "[S]earch" },
+				{ "<leader>w", group = "[W]orkspace" },
+				{ "<leader>t", group = "[T]oggle" },
+				{ "<leader>h", group = "Git [H]unk", mode = { "n", "v" } },
+			},
 		},
 	},
 	{ -- Fuzzy Finder (files, lsp, etc)
 		"nvim-telescope/telescope.nvim",
 		event = "VimEnter",
 		branch = "0.1.x",
+		defaults = {
+			file_ignore_patterns = {
+				"trainman.go/", -- This binary freezes my whole nvim process.
+			},
+		},
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"nvim-telescope/telescope-fzf-native.nvim",
@@ -221,6 +292,7 @@ require("lazy").setup({
 			end,
 			formatters_by_ft = {
 				lua = { "stylua" },
+				terraform = { "terraform_fmt" },
 				javascript = { "prettierd", "prettier", stop_after_first = true },
 				javascriptreact = { "prettierd", "prettier", stop_after_first = true },
 				typescript = { "prettierd", "prettier", stop_after_first = true },
@@ -313,6 +385,7 @@ require("lazy").setup({
 				"bash",
 				"c",
 				"diff",
+				"dockerfile",
 				"html",
 				"lua",
 				"luadoc",
@@ -355,46 +428,42 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"ThePrimeagen/harpoon",
-		branch = "harpoon2",
-		dependencies = { "nvim-lua/plenary.nvim" },
+		"preservim/nerdcommenter",
+	},
+	{
+		"christoomey/vim-tmux-navigator",
+		cmd = {
+			"TmuxNavigateLeft",
+			"TmuxNavigateDown",
+			"TmuxNavigateUp",
+			"TmuxNavigateRight",
+			"TmuxNavigatePrevious",
+			"TmuxNavigatorProcessList",
+		},
+		keys = {
+			{ "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
+			{ "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
+			{ "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
+			{ "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
+			{ "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+		},
+	},
+	{ -- Share clipboard with local machine
+		"ojroques/nvim-osc52",
 		config = function()
-			local harpoon = require("harpoon")
+			require("osc52").setup({
+				max_length = 0, -- Maximum length of selection (0 for no limit)
+				silent = false, -- Disable message on successful copy
+				trim = false, -- Trim surrounding whitespaces before copy
+				tmux_passthrough = true, -- Make sure we pass through escape codes through tmux
+			})
+			local function copy()
+				if (vim.v.event.operator == "y" or vim.v.event.operator == "d") and vim.v.event.regname == "" then
+					require("osc52").copy_register("")
+				end
+			end
 
-			harpoon:setup()
-
-			vim.keymap.set("n", "<leader>a", function()
-				harpoon:list():add()
-			end)
-			vim.keymap.set("n", "<C-e>", function()
-				harpoon.ui:toggle_quick_menu(harpoon:list())
-			end)
-
-			-- TODO: find better keybindings which don't conflict with my quickfix navigation
-			-- vim.keymap.set("n", "<C-h>", function()
-			-- 	harpoon:list():select(1)
-			-- end)
-			-- vim.keymap.set("n", "<C-j>", function()
-			-- 	harpoon:list():select(2)
-			-- end)
-			-- vim.keymap.set("n", "<C-k>", function()
-			-- 	harpoon:list():select(3)
-			-- end)
-			-- vim.keymap.set("n", "<C-l>", function()
-			-- 	harpoon:list():select(4)
-			-- end)
-			-- vim.keymap.set("n", "<leader><C-h>", function()
-			-- 	harpoon:list():replace_at(1)
-			-- end)
-			-- vim.keymap.set("n", "<leader><C-j>", function()
-			-- 	harpoon:list():replace_at(2)
-			-- end)
-			-- vim.keymap.set("n", "<leader><C-k>", function()
-			-- 	harpoon:list():replace_at(3)
-			-- end)
-			-- vim.keymap.set("n", "<leader><C-l>", function()
-			-- 	harpoon:list():replace_at(4)
-			-- end)
+			vim.api.nvim_create_autocmd("TextYankPost", { callback = copy })
 		end,
 	},
 })

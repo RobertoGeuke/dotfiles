@@ -10,5 +10,5 @@ vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagn
 vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Open [D]iagnostic info in window" })
 
 -- Move to quickfix list
-vim.keymap.set("n", "<C-k>", "<cmd>cprev<CR>zz", { desc = "Go to prev item in quickfix list" })
-vim.keymap.set("n", "<C-j>", "<cmd>cnext<CR>zz", { desc = "Go to next item in quickfix list" })
+vim.keymap.set("n", "<leader>k", "<cmd>cprev<CR>zz", { desc = "Go to prev item in quickfix list" })
+vim.keymap.set("n", "<leader>j", "<cmd>cnext<CR>zz", { desc = "Go to next item in quickfix list" })
