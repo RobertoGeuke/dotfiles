@@ -1,6 +1,6 @@
 -- Inspired on nvim-lua/kickstart.nvim
 
--- TODO 
+-- TODO
 -- - [ ] php renames (intelephense pro might have this)
 -- - [ ] Disable preview when ctrl + P. Only preview on live grep
 -- - [ ] Move Lazy plugins to separate files.
@@ -464,6 +464,13 @@ require("lazy").setup({
 			end
 
 			vim.api.nvim_create_autocmd("TextYankPost", { callback = copy })
+		end,
+	},
+	{
+		"echasnovski/mini.statusline",
+		version = "*",
+		config = function()
+			require("mini.statusline").setup()
 		end,
 	},
 })
