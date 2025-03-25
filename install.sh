@@ -27,9 +27,11 @@ fi
 
 # specific MacOS dotfiles
 if [[ $OSTYPE == 'darwin'* ]]; then
-    # alacritty
-    if [[ $FILTER == 'all' ]] || [[ $FILTER == 'alacritty' ]]; then
-        cp .alacritty.toml  ~/.alacritty.toml
+    # ghostty
+    if [[ $FILTER == 'all' ]] || [[ $FILTER == 'ghostty' ]]; then
+    	rm -rf ~/.config/ghostty
+    	mkdir -p ~/.config
+    	cp -r ghostty ~/.config/ghostty
     fi
 fi
 
