@@ -1,20 +1,19 @@
 -- Inspired on nvim-lua/kickstart.nvim
 
 -- TODO
--- - [ ] php renames (intelephense pro might have this)
+-- - [ ] think about what is Crisp specific and what is personal
+-- - [ ] Install https://github.com/yetone/avante.nvim with Claude API key (with spending limit)
+-- - [x] php renames (intelephense pro might have this)
 -- - [ ] Disable preview when ctrl + P. Only preview on live grep
 -- - [ ] Move Lazy plugins to separate files.
 -- - [x] Sync MacOS clipboard and tmux clipboard.
--- - Fugitive improvements
---    -  [ ] Add a shortcut so I can open a change in Gerrit from the Git Blame window.
---    -  [ ] Add a :Gload and :Gcommand like I have in zsh.
---    -  [ ] Replace :GPush or add a command to easily run `git push origin HEAD:/refs/for/master`
 -- - [ ] Close quickfix window with a keybinding
 -- - [x] (re)install which-key
 -- - [x] Install Nerdcommenter
 -- - [x] Install vim-tmux-navigator
 -- - [ ] Become better with netrw or install a file explorer
--- - [ ] Make my own plugin for phpstan in nvim, use telescope for this.
+-- - [x] Support phpstan linting
+-- - [ ] PHPStan triggers zombie processes
 -- - [x] Add support for Dockerfiles. Currently we always get an error when opening one (also in Telescope preview)
 -- - [ ] Access Obsidian notes from nvim with a command like "<leader>sn". This allows for quick notes. Import to keep it synced with cloud.
 -- - [ ] Look at repeat.vim
@@ -132,6 +131,7 @@ require("lazy").setup({
 		},
 		dependencies = {
 			"nvim-lua/plenary.nvim",
+			"nvim-tree/nvim-web-devicons",
 			"nvim-telescope/telescope-fzf-native.nvim",
 			build = "make",
 			cond = function()
@@ -215,6 +215,9 @@ require("lazy").setup({
 			local servers = {
 				gopls = {},
 				intelephense = {
+					init_options = {
+						-- licenceKey = "", -- Also read automatically from ~/intelephense/licence.txt
+					},
 					settings = {
 						intelephense = {
 							files = {
@@ -242,6 +245,18 @@ require("lazy").setup({
 			local ensure_installed = vim.tbl_keys(servers or {})
 			vim.list_extend(ensure_installed, {
 				"stylua", -- Used to format Lua code
+				"dockerfile-language-server",
+				"gopls",
+				"phpcs",
+				"phpstan",
+				"intelephense",
+				"lua-language-server",
+				"prettier",
+				"prettierd",
+				"stylua",
+				"terraform-ls",
+				"typescript-language-server",
+				"eslint-lsp",
 			})
 			require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
@@ -321,6 +336,7 @@ require("lazy").setup({
 			--  into multiple repos for maintenance purposes.
 			"hrsh7th/cmp-nvim-lsp",
 			"hrsh7th/cmp-path",
+			"hrsh7th/cmp-nvim-lsp-signature-help",
 		},
 		config = function()
 			-- See `:help cmp`
@@ -360,19 +376,17 @@ require("lazy").setup({
 					{ name = "nvim_lsp" },
 					{ name = "luasnip" },
 					{ name = "path" },
+					{ name = "nvim_lsp_signature_help" },
 				},
 			})
 		end,
 	},
 	{ -- Configure colorscheme
-		"rose-pine/neovim",
-		name = "rose-pine",
+		"catppuccin/nvim", -- "rose-pine/neovim"
+		name = "catppuccin", -- name = "rose-pine"
 		priority = 1000, -- Make sure to load this before all the other start plugins.
 		init = function()
-			vim.cmd.colorscheme("rose-pine")
-
-			-- You can configure highlights by doing something like:
-			vim.cmd.hi("Comment gui=none")
+			vim.cmd.colorscheme("catppuccin") -- rose-pine
 		end,
 	},
 	{ -- Highlight, edit, and navigate code
@@ -416,19 +430,10 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"tpope/vim-fugitive",
-		config = function()
-			vim.keymap.set("n", "<leader>p", ":Git push origin HEAD:refs/for/master")
-			-- TODO: commands below don't work yet, but I should be close
-			-- vim.api.nvim_create_user_command("Gitmaster", "git remote update && git reset --hard origin/master", {})
-			-- vim.api.nvim_create_user_command("Gitload", function(opts)
-			-- 	vim.cmd.Git({ "fetch origin", opts.fargs[1] })
-			-- 	vim.cmd.Git({ "reset --hard", opts.fargs[1] })
-			-- end, { nargs = 1 })
-		end,
-	},
-	{
 		"preservim/nerdcommenter",
+		config = function()
+			vim.g.NERDSpaceDelims = 1
+		end,
 	},
 	{
 		"christoomey/vim-tmux-navigator",
@@ -471,6 +476,82 @@ require("lazy").setup({
 		version = "*",
 		config = function()
 			require("mini.statusline").setup()
+		end,
+	},
+	{ -- Linting
+		"mfussenegger/nvim-lint",
+		event = { "BufReadPre", "BufNewFile" },
+		config = function()
+			local lint = require("lint")
+			lint.linters_by_ft = {
+				markdown = { "markdownlint" },
+				javascript = { "eslint" },
+				javascriptreact = { "eslint" },
+				typescript = { "eslint" },
+				typescriptreact = { "eslint" },
+				php = { "phpstan", "phpcs" }, -- disbaled "phpstan" because it created zombie processes
+			}
+			lint.linters.phpcs.cmd = "/home/robertogeuke/crisp/backend/vendor/bin/phpcs"
+			lint.linters.phpcs.args = {
+				"-q",
+				"--report=json",
+				"--standard=/home/robertogeuke/crisp/backend/phpcs.xml",
+				"-",
+			}
+			lint.linters.phpstan.cmd = "/home/robertogeuke/crisp/backend/vendor/bin/phpstan"
+			lint.linters.phpstan.args = {
+				"analyze",
+				"--error-format=json",
+				"--no-progress",
+				"--configuration=/home/robertogeuke/crisp/backend/phpstan.neon",
+			}
+
+			-- To allow other plugins to add linters to require('lint').linters_by_ft,
+			-- instead set linters_by_ft like this:
+			-- lint.linters_by_ft = lint.linters_by_ft or {}
+			-- lint.linters_by_ft['markdown'] = { 'markdownlint' }
+			--
+			-- However, note that this will enable a set of default linters,
+			-- which will cause errors unless these tools are available:
+			-- {
+			--   clojure = { "clj-kondo" },
+			--   dockerfile = { "hadolint" },
+			--   inko = { "inko" },
+			--   janet = { "janet" },
+			--   json = { "jsonlint" },
+			--   markdown = { "vale" },
+			--   rst = { "vale" },
+			--   ruby = { "ruby" },
+			--   terraform = { "tflint" },
+			--   text = { "vale" }
+			-- }
+			--
+			-- You can disable the default linters by setting their filetypes to nil:
+			-- lint.linters_by_ft['clojure'] = nil
+			-- lint.linters_by_ft['dockerfile'] = nil
+			-- lint.linters_by_ft['inko'] = nil
+			-- lint.linters_by_ft['janet'] = nil
+			-- lint.linters_by_ft['json'] = nil
+			-- lint.linters_by_ft['markdown'] = nil
+			-- lint.linters_by_ft['rst'] = nil
+			-- lint.linters_by_ft['ruby'] = nil
+			-- lint.linters_by_ft['terraform'] = nil
+			-- lint.linters_by_ft['text'] = nil
+
+			-- Create autocommand which carries out the actual linting
+			-- on the specified events.
+			local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
+			vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {
+				group = lint_augroup,
+				callback = function()
+					-- Only run the linter in buffers that you can modify in order to
+					-- avoid superfluous noise, notably within the handy LSP pop-ups that
+					-- describe the hovered symbol using Markdown.
+					if vim.opt_local.modifiable:get() then
+						lint.try_lint()
+					end
+				end,
+			})
 		end,
 	},
 })
