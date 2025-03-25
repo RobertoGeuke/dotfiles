@@ -14,7 +14,10 @@ fi
 
 # tmux
 if [[ $FILTER == 'all' ]] || [[ $FILTER == 'tmux' ]]; then
-    cp .tmux.conf ~/.tmux.conf
+    rm -rf ~/.config/tmux
+    mkdir -p ~/.config
+    cp -r tmux ~/.config/tmux
+    git clone -b v2.1.3 https://github.com/catppuccin/tmux.git ~/.config/tmux/plugins/catppuccin/tmux
 fi
 
 # nvim
