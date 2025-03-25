@@ -227,6 +227,7 @@ require("lazy").setup({
 					},
 				},
 				ts_ls = {},
+				-- tsserver = {}, Use on MacOS
 				lua_ls = {
 					settings = {
 						Lua = {
