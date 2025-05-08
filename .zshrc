@@ -6,7 +6,11 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # powerlevel10k theme
-source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+if [[ $OSTYPE == 'darwin'* ]]; then
+	source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+else
+	source ~/powerlevel10k/powerlevel10k.zsh-theme
+fi 
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # crisp-cli auto completion
