@@ -479,6 +479,13 @@ require("lazy").setup({
 			require("mini.statusline").setup()
 		end,
 	},
+	{
+		"kylechui/nvim-surround",
+		event = "VeryLazy",
+		config = function()
+			require("nvim-surround").setup({})
+		end,
+	},
 	{ -- Linting
 		"mfussenegger/nvim-lint",
 		event = { "BufReadPre", "BufNewFile" },
@@ -490,7 +497,7 @@ require("lazy").setup({
 				javascriptreact = { "eslint" },
 				typescript = { "eslint" },
 				typescriptreact = { "eslint" },
-				php = { "phpstan", "phpcs" }, -- disbaled "phpstan" because it created zombie processes
+				php = { "phpstan", "phpcs" }, -- creates zombie processes
 			}
 			lint.linters.phpcs.cmd = "/home/robertogeuke/crisp/backend/vendor/bin/phpcs"
 			lint.linters.phpcs.args = {
