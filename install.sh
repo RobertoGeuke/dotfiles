@@ -41,5 +41,5 @@ fi
 # Install cli tools when using Ubuntu
 if command -v apt &>/dev/null; then
   sudo apt update
-  sudo apt install -y neovim tmux ripgrep
+  sudo apt install -y zsh neovim tmux ripgrep
 fi
