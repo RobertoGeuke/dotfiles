@@ -499,19 +499,19 @@ require("lazy").setup({
 				typescriptreact = { "eslint" },
 				php = { "phpstan", "phpcs" }, -- creates zombie processes
 			}
-			lint.linters.phpcs.cmd = "/home/robertogeuke/crisp/backend/vendor/bin/phpcs"
+			lint.linters.phpcs.cmd = "~/crisp/backend/vendor/bin/phpcs"
 			lint.linters.phpcs.args = {
 				"-q",
 				"--report=json",
-				"--standard=/home/robertogeuke/crisp/backend/phpcs.xml",
+				"--standard=~/crisp/backend/phpcs.xml",
 				"-",
 			}
-			lint.linters.phpstan.cmd = "/home/robertogeuke/crisp/backend/vendor/bin/phpstan"
+			lint.linters.phpstan.cmd = "~/crisp/backend/vendor/bin/phpstan"
 			lint.linters.phpstan.args = {
 				"analyze",
 				"--error-format=json",
 				"--no-progress",
-				"--configuration=/home/robertogeuke/crisp/backend/phpstan.neon",
+				"--configuration=~/crisp/backend/phpstan.neon",
 			}
 
 			-- To allow other plugins to add linters to require('lint').linters_by_ft,
