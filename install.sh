@@ -40,7 +40,8 @@ fi
 
 # Install cli tools when using Ubuntu
 if command -v apt &>/dev/null; then
-  sudo apt-get install software-properties-common
+  sudo apt update
+  sudo apt install -y software-properties-common
   sudo add-apt-repository ppa:neovim-ppa/stable
   sudo apt update
   sudo apt install -y zsh neovim tmux ripgrep
