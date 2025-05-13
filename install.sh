@@ -41,8 +41,10 @@ fi
 # Install cli tools when using Ubuntu
 if command -v apt &>/dev/null; then
   sudo apt update
-  sudo apt install -y software-properties-common
-  sudo add-apt-repository ppa:neovim-ppa/stable
-  sudo apt update
-  sudo apt install -y zsh neovim tmux ripgrep
+  sudo apt install -y zsh tmux ripgrep
+
+  curl -LO https://github.com/neovim/neovim/releases/download/v0.10.4/nvim-linux-x86_64.tar.gz
+  sudo rm -rf /opt/nvim
+  sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+  echo -n 'export PATH=/opt/nvim-linux-x86_64/bin:$PATH' >> ~/.zshrc
 fi
